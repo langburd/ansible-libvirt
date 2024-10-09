@@ -3,7 +3,7 @@
   hosts: libvirt-hosts
   vars:
     image_cache_path: /tmp/libvirt-vm-cache
-    ssh_public_key_path: ~/.ssh/id_rsa.pub
+    ssh_public_key_path: ~/.ssh/ddyy/root@kvm.ddyy.pro
   tasks:
     # TODO: Do this in parallel using delegate_to. Had issues with
     # stackhpc.libvirt-vm accessing facts of the delegate host.

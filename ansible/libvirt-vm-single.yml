@@ -5,7 +5,7 @@
     state: directory
     owner: "{{ ansible_user_uid }}"
     group: "{{ ansible_user_gid }}"
-  become: True
+  become: true
 
 - name: If defined, create a user_data file
   copy:
@@ -15,7 +15,7 @@
     owner: "{{ ansible_user_uid }}"
     group: "{{ ansible_user_gid }}"
   when: hostvars[vm_host].vm_user_data is defined and hostvars[vm_host].vm_user_data
-  become: True
+  become: true
 
 - import_role:
     name: jriguera.configdrive
@@ -30,7 +30,8 @@
     configdrive_config_user_data_path: "{{ (image_cache_path ~ '/user_data') if hostvars[vm_host].vm_user_data is defined | default(omit) }}"
     configdrive_instance_dir: "{{ configdrive_uuid }}"
     configdrive_volume_path: "{{ image_cache_path }}"
-    configdrive_config_dir_delete: True
+    configdrive_ssh_public_key_path: "{{ ssh_public_key_path }}"
+    configdrive_config_dir_delete: true
     configdrive_resolv:
       domain: "{{ hostvars[vm_host].resolv_domain | default }}"
       search: "{{ hostvars[vm_host].resolv_search | default }}"
@@ -53,9 +54,8 @@
 - name: Check the size of the configdrive image
   stat:
     path: "{{ vm_configdrive_path }}"
-    get_checksum: False
-    get_md5: False
-    mime: False
+    get_checksum: false
+    mime: false
   register: stat_result
 
 - import_role:
@@ -76,8 +76,9 @@
         vcpus: "{{ hostvars[vm_host].vm_vcpus }}"
         volumes: "{{ hostvars[vm_host].vm_volumes + [vm_configdrive_volume] }}"
         interfaces: "{{ hostvars[vm_host].vm_interfaces }}"
-        console_log_enabled: true
-    become: True
+        state: "{{ hostvars[vm_host].state }}"
+        console_log_enabled: false
+    become: true
 
 - name: Wait for SSH access to the VM
   local_action:
@@ -88,3 +89,4 @@
     # NOTE: Ensure we exceed the 5 minute DHCP timeout of the eth0
     # interface if necessary.
     timeout: 360
+  when: hostvars[vm_host].state is defined and hostvars[vm_host].state == 'present'

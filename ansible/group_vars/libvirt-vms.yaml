@@ -1,0 +1,77 @@
+---
+vm_pool: ssd_storage
+
+vm_volumes:
+  - name: "{{ inventory_hostname }}-root"
+    pool: ssd_storage
+    capacity: 30G
+    format: qcow2
+    image: "{{ vm_image }}"
+
+# vm_image: https://cloud-images.ubuntu.com/jammy/current/jammy-server-cloudimg-amd64-disk-kvm.img
+# vm_image: https://cloud.centos.org/centos/9-stream/x86_64/images/CentOS-Stream-GenericCloud-x86_64-9-20241007.0.x86_64.qcow2
+# vm_image: https://cloud.debian.org/images/cloud/bookworm/20241004-1890/debian-12-genericcloud-amd64-20241004-1890.qcow2 # not working
+vm_image: https://cloud.debian.org/images/cloud/bookworm/20241004-1890/debian-12-generic-arm64-20241004-1890.qcow2
+
+resolv_domain:
+resolv_search:
+resolv_nameservers:
+  - 192.168.8.1
+
+vm_interfaces:
+  - network: baza
+
+# vm_ip should be defined in hostvars.
+vm_netmask: "255.255.254.0"
+vm_gateway: "192.168.8.1"
+
+vm_configdrive_network_device_list:
+  - device: eth0
+    address: "{{ vm_ip }}"
+    netmask: "{{ vm_netmask }}"
+    gateway: "{{ vm_gateway }}"
+    bootproto: static
+    mtu: 1500
+
+vm_hypervisor: "{{ groups['libvirt-hosts'][0] }}"
+
+# user_data can be passed to the instance
+vm_user_data: |
+  #cloud-config
+  hostname: template-debian-12
+  manage_etc_hosts: true
+  ssh_pwauth: false
+  disable_root: false
+  users:
+    - name: avi
+      groups: sudo
+      gecos: Avi Langburd
+      shell: /usr/bin/bash
+      ssh_authorized_keys:
+        - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDuGmUhuyGDvCe8b30ySAyrCTgJKXhvlTXcIUWRxWJrY root@kvm.ddyy.pro
+      lock_passwd: false
+      passwd: $6$rounds=4096$6/4vJCoOQuK/.FIT$bPJZpOHfS3uVBDYLSvdHWOme2aym90URT.x81TvEaba9s4ksSB3Ckn601YTltYcvMmTtxBEMMl65HWZrylV0A1
+      sudo: "ALL=(ALL) NOPASSWD:ALL"
+  package_update: true
+  package_upgrade: true
+  packages:
+    - sudo
+    - openssh-server
+    - bind-utils
+    - qemu-guest-agent
+  # network:
+  #   version: 1
+  #   config:
+  #     - type: physical
+  #       name: interface0
+  #       mac_address: '00:11:22:33:44:55'
+  #       subnets:
+  #         - type: dhcp
+  #         - type: static
+  #           address: 192.168.23.14/27
+  #           gateway: 192.168.23.1
+  #           dns_nameservers:
+  #             - 192.168.23.2
+  #             - 8.8.8.8
+  #           dns_search:
+  #             - exemplary

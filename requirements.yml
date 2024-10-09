@@ -1,6 +1,7 @@
 ---
-- src: jriguera.configdrive
-  # There are no versioned releases of this role.
-  version: f9baca67ad8df980c7202c0d7b3039aba517813f
+- src: git@github.com:langburd/ansible-role-configdrive.git
+  name: jriguera.configdrive
+  version: "master"
+  scm: git
 - src: stackhpc.libvirt-host
 - src: stackhpc.libvirt-vm
