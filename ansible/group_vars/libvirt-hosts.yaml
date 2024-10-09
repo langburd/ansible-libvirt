@@ -1,0 +1,19 @@
+---
+libvirt_host_pools:
+  - name: ssd_storage
+    type: dir
+    path: /ssd
+    mode: 755
+    owner: root
+    group: root
+  - name: hdd_storage
+    type: dir
+    path: /hdd
+    mode: 755
+    owner: root
+    group: root
+
+libvirt_host_networks:
+  - name: baza
+    mode: bridge
+    bridge: br1
